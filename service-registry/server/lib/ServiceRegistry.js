@@ -5,7 +5,7 @@ class ServiceRegistry {
   constructor(log) {
     this.log = log;
     this.services = {};
-    this.timeout = 10;
+    this.timeout = 30;
   }
 
   // finds new resource
@@ -21,6 +21,7 @@ class ServiceRegistry {
   register(name, version, ip, port) {
     this.cleanup();
     const key = name + version + ip + port;
+    console.log("this is keyyy", key);
     if (!this.services[key]) {
       this.services[key] = {};
       this.services[key].timestamp = Math.floor(new Date() / 1000);
@@ -40,6 +41,7 @@ class ServiceRegistry {
   unregister(name, version, ip, port) {
     const key = name + version + ip + port;
     delete this.services[key];
+    this.log.debug(`removed ${name}, version ${version}`);
     return key;
   }
 
@@ -50,6 +52,7 @@ class ServiceRegistry {
       if (this.services[key].timestamp + this.timeout < now) {
         delete this.services[key];
         this.log.debug(`removed ${this.services[key].name}`);
+        return key;
       }
     });
   }
