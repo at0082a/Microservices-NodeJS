@@ -1,10 +1,11 @@
 const express = require('express');
-
+const SpeakersService = require('./lib/Speakers');
 const service = express();
 
 module.exports = (config) => {
   const log = config.log();
   // Add a request logging middleware in development mode
+  const speakers = new SpeakersService(config.data.speakers);
   if (service.get('env') === 'development') {
     service.use((req, res, next) => {
       log.debug(`${req.method}: ${req.url}`);
@@ -12,24 +13,54 @@ module.exports = (config) => {
     });
   }
 
-  service.get('/list', (req, res, next) => {
-    return next('not implemented');
+  service.use('/images/', express.static(config.data.images));
+
+  service.get('/list', async (req, res, next) => {
+    try {
+      return res.json(await speakers.getData());
+    } catch (err) {
+      return next(err);
+    }
   });
 
-  service.get('/list-short', (req, res, next) => {
-    return next('not implemented');
+  service.get('/list-short', async (req, res, next) => {
+    try {
+      return res.json(await speakers.getListShort());
+    } catch (err) {
+      return next(err);
+    }
   });
 
-  service.get('/names', (req, res, next) => {
-    return next('not implemented');
+  service.get('/names', async (req, res, next) => {
+    try {
+      return res.json(await speakers.getNames());
+    } catch (err) {
+      return next(err);
+    }
   });
 
-  service.get('/speaker/:shortname', (req, res, next) => {
-    return next('not implemented');
+  service.get('/artwork', async (req, res, next) => {
+    try {
+      return res.json(await speakers.getAllArtwork());
+    } catch (err) {
+      return next(err);
+    }
   });
 
-  service.get('/artwork/:shortname', (req, res, next) => {
-    return next('not implemented');
+  service.get('/speaker/:shortname', async (req, res, next) => {
+    try {
+      return res.json(await speakers.getSpeaker(req.params.shortname));
+    } catch (err) {
+      return next(err);
+    }
+  });
+
+  service.get('/artwork/:shortname', async (req, res, next) => {
+    try {
+      return res.json(await speakers.getArtworkForSpeaker(req.params.shortname));
+    } catch (err) {
+      return next(err);
+    }
   });
 
   // eslint-disable-next-line no-unused-vars
